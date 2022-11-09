@@ -1,0 +1,197 @@
+```#include <bits/stdc++.h>
+#define ff first
+#define ss second
+
+using namespace std;
+
+string toBin(int c){
+    string ans = "";
+    for(int i = 0; i < 5; ++i){
+        ans = to_string(c % 2) + ans;
+        c /= 2;
+    }
+    return ans;
+}
+
+bool ok(string a, string b){
+    for(int i = 0; i < a.size(); ++i){
+        if(b[i] == '-'){}
+        else if(a[i] == b[i]){}
+        else return 0;
+    }
+    return 1;
+}
+
+int getL(vector<string> v){
+    int ans = 0;
+    for(auto it: v){
+        for(int i = 0; i < it.size(); ++i){
+            if(it[i] != '-'){
+                ans++;
+            }
+        }
+    }
+    return ans;
+}
+
+int main()
+{
+    ifstream cin("in.txt");
+    ofstream cout("out.txt");
+    string s = "";
+    for(int i = 0; i < 8; ++i){
+        string l;
+        cin >> l;
+        s += l;
+    }
+
+
+    map<string,int> v;
+    for(int i = 0; i < s.size(); ++i){
+        if(s[i] == '1'){
+            v[toBin(i)] = 0;
+        }
+    }
+    map<string,int> v1;
+    vector<string> result;
+    for(int step = 0; step < 5; ++step){
+        v1.clear();
+        for(auto &it : v){
+        //cout << it.ff << " ";
+            for(auto &jt : v){
+
+                int cnt = 0;
+                int pos = -1;
+                for(int k = 0; k < 5; ++k){
+                    if(it.ff[k] == '0' && jt.ff[k] == '1'){
+                        cnt++;
+                        pos = k;
+                    }else if(it.ff[k] == '1' && jt.ff[k] == '0'){
+                        cnt++;
+                        pos = k;
+                    }else if(it.ff[k] == '-' && jt.ff[k] != '-'){
+                        cnt = 5;
+                        break;
+                    }else if(it.ff[k] != '-' && jt.ff[k] == '-'){
+                        cnt = 5;
+                        break;
+                    }
+                }
+                //cout << it.ff << " " << jt.ff << endl;
+                if(cnt == 1){
+                    it.ss = 1;
+                    jt.ss = 1;
+                    string tmp = it.ff;
+                    tmp[pos] = '-';
+                    v1[tmp] = 0;
+                }
+            }
+        }
+        //cout << endl;
+        for(auto &it : v){
+            if(it.ss == 0){
+                result.push_back(it.ff);
+            }
+        }
+        v = v1;
+    }
+//    for(int i = 0; i < result.size(); ++i){
+//        cout << result[i] << endl;
+//    }
+
+    int n = 1 << result.size();
+    vector<string> need;
+    for(int i = 0; i < s.size(); ++i){
+        if(s[i] == '1'){
+            need.push_back(toBin(i));
+        }
+    }
+    int minL = 10000;
+    vector<string> minV;
+    for(int i = 0; i < n; ++i){
+        int j = 0;
+        int now = i;
+        vector<string> tmp;
+        while(now > 0){
+            if(now % 2 == 1){
+                tmp.push_back(result[j]);
+            }
+            j++;
+            now /= 2;
+        }
+        bool check = 1;
+        for(auto it: need){
+            bool check1 = 0;
+            for(int j = 0; j < tmp.size(); ++j){
+                if(ok(it, tmp[j])){
+                    check1 = 1;
+                    break;
+                }
+            }
+            if(!check1){
+                check = 0;
+                break;
+            }
+        }
+
+        if(check){
+            if(getL(tmp) < minL){
+                minL = getL(tmp);
+                minV = tmp;
+            }
+        }
+    }
+
+//    for(auto it: minV){
+//        cout << it << " ";
+//    }
+
+    vector<string> preAns;
+    for(auto it: minV){
+        int fst = 0;
+        for(int i = 0; i < it.size(); ++i){
+            if(it[i] != '-'){
+                fst = i;
+                break;
+            }
+        }
+        string s = "";
+        for(int i = 0; i < it.size(); ++i){
+            if(i == fst){
+                if(it[i] == '1'){
+                    s = to_string(i+1);
+                }else{
+                    s = "(!" + to_string(i+1) + ")";
+                }
+            }else if(it[i] != '-'){
+                string ss;
+                if(it[i] == '1'){
+                    ss = to_string(i+1);
+                }else{
+                    ss = "(!" + to_string(i+1) + ")";
+                }
+                s = "(" + s + "&" + ss + ")";
+            }
+        }
+        preAns.push_back(s);
+    }
+    string ans = preAns[0];
+    for(int i = 1; i < preAns.size(); ++i){
+        ans = "(" + ans + "|" + preAns[i] + ")";
+    }
+    cout << ans << "\n\n";
+
+    cout << "f =";
+    for(int i = 0; i < s.size(); ++i){
+        if(i % 4 == 0){
+            cout << " ";
+        }
+        cout << s[i];
+    }
+    cout << "\n\n";
+
+    for(auto it : preAns){
+        cout << it << "\n";
+    }
+}
+```
